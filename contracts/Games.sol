@@ -1,6 +1,12 @@
 pragma solidity ^0.5.8;
 contract Games {
 
+    address owner;
+
+    constructor () public {
+        owner = msg.sender;
+    }
+
     struct Game {
         uint id;
         string name;
@@ -12,12 +18,15 @@ contract Games {
     struct User {
         uint id;
         address addr;
-        string gameOwned;
-        uint gameOwnedId;
+        uint[] gameOwnedId;
     }
 
 
     event newGameAdd(
+        string game
+    );
+
+    event gameBought(
         string game
     );
 
@@ -40,15 +49,24 @@ contract Games {
 
     function buyGame(uint _gameId) public payable {
         require(msg.value >= games[_gameId].value, "Not enough money");
-        require(users[msg.sender].gameOwnedId != _gameId, "You already have this game");
 
         games[_gameId].gameOwner.transfer(msg.value);
+
         userCount++;
-        users[msg.sender] = User(userCount, msg.sender, games[_gameId].name, _gameId);
+        users[msg.sender].id = userCount;
+        users[msg.sender].addr = msg.sender;
+        users[msg.sender].gameOwnedId.push(_gameId);
+
+        emit gameBought(games[_gameId].name);
+
     }
 
-    function gameOwned(address addr) public view {
-        return;
+    function getGames() public view returns (uint[] memory) {
+        return users[msg.sender].gameOwnedId;
+    }
+
+    function checkGameOwned(uint _gameId) private view returns (bool) {
+
     }
 
 }

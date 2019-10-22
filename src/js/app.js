@@ -33,6 +33,8 @@ App = {
 
       App.listGames();
 
+      App.listOfGames();
+
       App.render();
     });
   },
@@ -82,8 +84,9 @@ App = {
     var gameId = $(obj).attr('game-id');
     console.log(gameId);
     App.contracts.Games.deployed().then(function(instance){
-      instance.buyGame(gameId, {value: web3.toWei(2, 'ether')});
-      console.log("aqui");
+      instance.games(gameId).then(function(game){
+        instance.buyGame(gameId, {value: web3.toWei(game[2], 'ether'), from: App.account});
+      });
     }).catch(function(err){
       console.log(err);
     });
@@ -102,7 +105,7 @@ App = {
       for (var i=1 ; i <= count; i++){
         gameInstance.games(i).then(function(game){
           gameTemplate.find('.card-title').text(game[1]);
-          gameTemplate.find('.card-text').text(game[2] + ",00");
+          gameTemplate.find('.card-text').text(game[2] + " Eth");
           gameTemplate.find('.btn-primary').attr('game-id', game[0]);
           gameTemplate.find('.card-img-top').attr('src', game[3]);
           card.append(gameTemplate.html());
@@ -115,24 +118,23 @@ App = {
     var card = $('#listGames');
     var findGame = $('#gameSearch').val();
     var gameTemplate = $('#gameTemplate');
+    var notFound = $("#notFound");
+
     App.contracts.Games.deployed().then(function(instance){
       gameInstance = instance;
       return gameInstance.gameCount()
     }).then(function(count){
       if (findGame != ""){
-        for (var i=1 ; i < count; i++){
+        card.empty();
+        for (var i=1 ; i < count+1; i++){
           gameInstance.games(i).then(function(game){
             if(game[1].includes(findGame)){
-              card.empty();
+              console.log(game[1], findGame);
               gameTemplate.find('.card-title').text(game[1]);
               gameTemplate.find('.card-text').text(game[2] + ",00");
               gameTemplate.find('.btn-primary').attr('game-id', game[0]);
               gameTemplate.find('.img').attr('src', game[3]);
               card.append(gameTemplate.html());
-            } else {
-              card.empty();
-              var notFound = $("#notFound");
-              card.append(notFound.html());
             }
           });
         }
@@ -150,6 +152,25 @@ App = {
       }).watch(function(error, event){
         console.log(event);
         App.listGames();
+      });
+      instance.gameBought({},{
+        fromBlock: 'latest'
+      }).watch(function(error, event){
+        //App.listOfGames();
+      });
+    });
+  },
+
+  listOfGames : function() {
+    var list = $("#gameList");
+    var item = $("#item-teste");
+    App.contracts.Games.deployed().then(function(instance){
+      instance.getGames().then(function(result){
+        list.empty();
+        for(var i=0;i<result.length; i++){
+          item.find(".list-group-item").text(result[i]);
+          list.append(item.html());
+        }
       });
     });
   }
