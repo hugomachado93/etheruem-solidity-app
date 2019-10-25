@@ -157,17 +157,12 @@ App = {
         fromBlock: 'latest'
       }).watch(function(error, event){
         console.log(event);
-        App.listGames();
+        //App.listGames();
       });
       instance.gameBought({},{
         fromBlock: 'latest'
       }).watch(function(error, event){
         //App.listOfGames();
-      });
-      instance.gameTraded({},{
-        fromBlock: 'latest'
-      }).watch(function(error, event){
-        App.initContract();
       });
     });
   },
