@@ -35,6 +35,8 @@ App = {
 
       App.listOfGames();
 
+      App.getTrades();
+
       App.render();
     });
   },
@@ -70,9 +72,10 @@ App = {
     var name = $("#gameName").val();
     var value = $("#gameValue").val();
     var imageUrl = $('#imageUrl').val();
+    var description = $("#gameDescription").val();
     console.log(name, value);
     App.contracts.Games.deployed().then(function(instance){
-      return instance.addGame(name, value, imageUrl, {from: App.account});
+      return instance.addGame(name, value, imageUrl, description, {from: App.account});
     }).then(function(result){
       console.log("done");
     }).catch(function(err){
@@ -82,10 +85,10 @@ App = {
 
   buyGame : function(obj) {
     var gameId = $(obj).attr('game-id');
-    console.log(gameId);
+    var gameName = $(obj).attr('game-name');
     App.contracts.Games.deployed().then(function(instance){
       instance.games(gameId).then(function(game){
-        instance.buyGame(gameId, {value: web3.toWei(game[2], 'ether'), from: App.account});
+        instance.buyGame(gameId, gameName, {value: web3.toWei(game[2], 'ether')});
       });
     }).catch(function(err){
       console.log(err);
@@ -105,9 +108,11 @@ App = {
       for (var i=1 ; i <= count; i++){
         gameInstance.games(i).then(function(game){
           gameTemplate.find('.card-title').text(game[1]);
-          gameTemplate.find('.card-text').text(game[2] + " Eth");
-          gameTemplate.find('.btn-primary').attr('game-id', game[0]);
-          gameTemplate.find('.card-img-top').attr('src', game[3]);
+          gameTemplate.find('.mb-2').text(game[2] + " Eth");
+          gameTemplate.find('.card-link').attr('game-id', game[0]);
+          gameTemplate.find('.card-link').attr('game-name', game[1]);
+          gameTemplate.find('.card-img').attr('src', game[3]);
+          gameTemplate.find('.card-text').text(game[5].substring(0,200) + "...");
           card.append(gameTemplate.html());
         });
       }
@@ -131,9 +136,10 @@ App = {
             if(game[1].includes(findGame)){
               console.log(game[1], findGame);
               gameTemplate.find('.card-title').text(game[1]);
-              gameTemplate.find('.card-text').text(game[2] + ",00");
-              gameTemplate.find('.btn-primary').attr('game-id', game[0]);
-              gameTemplate.find('.img').attr('src', game[3]);
+              gameTemplate.find('.mb-2').text(game[2] + " Eth");
+              gameTemplate.find('.card-link').attr('game-id', game[0]);
+              gameTemplate.find('.card-link').attr('game-name', game[1]);
+              gameTemplate.find('.card-img').attr('src', game[3]);
               card.append(gameTemplate.html());
             }
           });
@@ -158,19 +164,72 @@ App = {
       }).watch(function(error, event){
         //App.listOfGames();
       });
+      instance.gameTraded({},{
+        fromBlock: 'latest'
+      }).watch(function(error, event){
+        App.initContract();
+      });
     });
   },
 
   listOfGames : function() {
+    var gameInstance;
     var list = $("#gameList");
     var item = $("#item-teste");
+    list.empty();
     App.contracts.Games.deployed().then(function(instance){
-      instance.getGames().then(function(result){
-        list.empty();
-        for(var i=0;i<result.length; i++){
-          item.find(".list-group-item").text(result[i]);
-          list.append(item.html());
+      gameInstance = instance;
+      gameInstance.getGamesSize().then(function(size){
+        for(var i=0;i<size; i++){
+          gameInstance.getGames(i).then(function(result){
+            console.log("aqui " + i);
+            item.find(".list-group-item").text(result);
+            list.append(item.html());
+          });
         }
+      });
+    });
+  },
+
+  trade: function() {
+    var address = $("#addressTrade").val();
+    var game = $("#gameTrade").val();
+    var value = $("#valueTrade").val();
+    console.log(address, game, value);
+    App.contracts.Games.deployed().then(function(instance){
+      instance.initTrade(address, game, value, {from: App.account}).then(function(result){
+        console.log("done");
+      });
+    });
+  },
+
+  getTrades: function() {
+    var user = $("#userToTrade");
+    var userAddress = $("#userTrade");
+    var gameTrade = $("#gameTradeName");
+    var gameVal = $("#gameVal");
+    var accept = $("#accept");
+    App.contracts.Games.deployed().then(function(instance){
+      instance.getTrades({from: App.account}).then(function(result){
+        user.show();     
+        userAddress.text("User: " + result[0]);
+        gameTrade.text(result[1]);
+        gameVal.text(result[2]);
+        accept.attr('value', result[2]);
+        accept.attr('gameTradeName', result[1]);
+        accept.attr('userTrade', result[0]);
+      });
+    });
+  },
+
+  acceptTrade: function(obj) {
+    var val = $(obj).attr("value");
+    var gameTrade = $(obj).attr("gameTradeName");
+    var userTrade = $(obj).attr("userTrade");
+    console.log(val, gameTrade, userTrade);
+    App.contracts.Games.deployed().then(function(instance){
+      instance.tradeGame(gameTrade, userTrade, {value: web3.toWei(val, 'ether')}).then(function(result){
+        console.log(result);
       });
     });
   }

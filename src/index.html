@@ -18,7 +18,7 @@
     <![endif]-->
   </head>
   <body>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <a class="navbar-brand" href="#">Navbar</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -30,10 +30,13 @@
                 <a class="nav-link" href="/index.html">Home <span class="sr-only">(current)</span></a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/upload.html ">Upload</a>
+                <a class="nav-link" href="/upload.html ">Publish</a>
               </li>
               <li class="nav-item">
                   <a class="nav-link" href="/mygames.html ">My Games</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/trade.html ">Trade</a>
                 </li>
             </ul>
             <form onsubmit="App.gameSearch(); return false" class="form-inline my-2 my-lg-0">
@@ -42,29 +45,40 @@
             </form>
           </div>
         </nav>
-        
+      
         <div class="container">
             <div class="row">
-              <div class="col-xs-12 col-sm-12 col-sm-push-2">
+              <div class="col-18 col-sm-16 col-md-16">
                 <h1 class="text-center">Game List</h1>
                 <hr/>
                 <br/>
+                <div id="listGames" class="row">
+                </div>
               </div>
-            </div>
-      
-            <div id="listGames" style="width: 1200px;" class="row">
             </div>
 
             <br>
-              <nav aria-label="...">
-                  <ul class="pagination">
-                    <li class="page-item active">
-                      <a class="page-link" href="#">1 <span class="sr-only">(current)</span></a>
-                    </li>
-                  </ul>
-                </nav>
           </div>
-
+          <div id="content" style="display: none;">
+              <p id="gameCount"></p>
+            </div>
+          <div style="display:none" id="gameTemplate" class="container">
+            <div class="col-12 col-sm-10 col-md-6">
+            <div class="card">
+              <img class="card-img" src="https://s3.eu-central-1.amazonaws.com/bootstrapbaymisc/blog/24_days_bootstrap/bologna-3.jpg" alt="...">
+            <div class="card-img-overlay text-white d-flex flex-column justify-content-center">
+              <div class="space"><br><br><br><br><br></div>
+              <h4 class="card-title">Bologna</h4>
+              <p class="card-text"> </p>
+              <h6 class="card-subtitle mb-2"></h6>
+              <div class="link d-flex">
+                <a onclick="App.buyGame(this); return false" href="#" class="card-link text-warning">Purshase</a>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+          
           <div style="display:none" id="gameTemplate" class="container">
               <div class="card" style="width: 18rem;">
                 <img src="http://saveabandonedbabies.org/wp-content/uploads/2015/08/default.png" class="card-img-top" alt="...">
